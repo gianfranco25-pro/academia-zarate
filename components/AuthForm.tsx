@@ -102,16 +102,21 @@ const AuthForm = ({ type }: { type: FormType }) => {
       <div className="flex flex-col gap-6 card py-14 px-10">
         <div className="flex flex-row gap-2 justify-center">
           <Image src="/logo.svg" alt="logo" height={32} width={38} />
-          <h2 className="text-primary-100">PrepWise</h2>
+          <h2 className="text-primary-100">Academia Zarate Consultas</h2>
         </div>
 
-        <h3>Practice job interviews with AI</h3>
+        <h3>
+          "¡Bienvenido! Aquí podrás resolver tus dudas<br/>
+          &nbsp;&nbsp;&nbsp;académicas de manera rápida y sencilla <br/>
+          &nbsp;&nbsp;&nbsp;usando inteligencia artificial."
+        </h3>
 
         <Form {...form}>
-          <form
-            onSubmit={form.handleSubmit(onSubmit)}
-            className="w-full space-y-6 mt-4 form"
-          >
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="w-full space-y-6 mt-4 form"
+                autoComplete="off"
+              >
             {!isSignIn && (
               <FormField
                 control={form.control}
@@ -122,35 +127,35 @@ const AuthForm = ({ type }: { type: FormType }) => {
               />
             )}
 
-            <FormField
-              control={form.control}
-              name="email"
-              label="Email"
-              placeholder="Your email address"
-              type="email"
-            />
+                    <FormField
+                      control={form.control}
+                      name="email"
+                      label="Email"
+                      placeholder="Your email address"
+                      type="email"
+                    />
 
-            <FormField
-              control={form.control}
-              name="password"
-              label="Password"
-              placeholder="Enter your password"
-              type="password"
-            />
+                    <FormField
+                      control={form.control}
+                      name="password"
+                      label="Password"
+                      placeholder="Enter your password"
+                      type="password"
+                    />
 
             <Button className="btn" type="submit">
-              {isSignIn ? "Sign In" : "Create an Account"}
+              {isSignIn ? "Iniciar sesión" : "Crear cuenta"}
             </Button>
           </form>
         </Form>
 
         <p className="text-center">
-          {isSignIn ? "No account yet?" : "Have an account already?"}
+          {isSignIn ? "¿No tienes cuenta?" : "¿Ya tienes cuenta?"}
           <Link
             href={!isSignIn ? "/sign-in" : "/sign-up"}
             className="font-bold text-user-primary ml-1"
           >
-            {!isSignIn ? "Sign In" : "Sign Up"}
+            {!isSignIn ? "Iniciar sesión" : "Registrarse"}
           </Link>
         </p>
       </div>
