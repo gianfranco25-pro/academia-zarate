@@ -11,15 +11,21 @@ import {
 } from "@/lib/actions/general.action";
 
 async function Home() {
+
   const user = await getCurrentUser();
 
-  const [userInterviews, allInterview] = await Promise.all([
-    getInterviewsByUserId(user?.id!),
-    getLatestInterviews({ userId: user?.id! }),
-  ]);
+  let userInterviews = null;
+  let allInterview = null;
 
-  const hasPastInterviews = userInterviews?.length! > 0;
-  const hasUpcomingInterviews = allInterview?.length! > 0;
+  if (user?.id) {
+    [userInterviews, allInterview] = await Promise.all([
+      getInterviewsByUserId(user.id),
+      getLatestInterviews({ userId: user.id }),
+    ]);
+  }
+
+  const hasPastInterviews = (userInterviews?.length ?? 0) > 0;
+  const hasUpcomingInterviews = (allInterview?.length ?? 0) > 0;
 
   return (
     <>
