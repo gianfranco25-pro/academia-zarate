@@ -99,27 +99,34 @@ export async function signOut() {
 // Get current user from session cookie
 export async function getCurrentUser(): Promise<User | null> {
   const cookieStore = await cookies();
-
   const sessionCookie = cookieStore.get("session")?.value;
-  if (!sessionCookie) return null;
+  console.log("[getCurrentUser] sessionCookie:", sessionCookie);
+  if (!sessionCookie) {
+    console.log("[getCurrentUser] No session cookie found");
+    return null;
+  }
 
   try {
     const decodedClaims = await auth.verifySessionCookie(sessionCookie, true);
+    console.log("[getCurrentUser] decodedClaims:", decodedClaims);
 
     // get user info from db
     const userRecord = await db
       .collection("users")
       .doc(decodedClaims.uid)
       .get();
-    if (!userRecord.exists) return null;
+    if (!userRecord.exists) {
+      console.log("[getCurrentUser] No user record found for UID", decodedClaims.uid);
+      return null;
+    }
 
+    console.log("[getCurrentUser] User found:", userRecord.data());
     return {
       ...userRecord.data(),
       id: userRecord.id,
     } as User;
   } catch (error) {
-    console.log(error);
-
+    console.log("[getCurrentUser] Error verifying session cookie:", error);
     // Invalid or expired session
     return null;
   }
