@@ -17,7 +17,7 @@ import {
 import { Form } from "@/components/ui/form";
 import { Button } from "@/components/ui/button";
 
-import { signIn, signUp } from "@/lib/actions/auth.action";
+import { signUp } from "@/lib/actions/auth.action";
 import FormField from "./FormField";
 
 const authFormSchema = (type: FormType) => {
@@ -68,26 +68,46 @@ const AuthForm = ({ type }: { type: FormType }) => {
         router.push("/sign-in");
       } else {
         const { email, password } = data;
+        console.log("[AuthForm] Iniciando sesión con:", email);
 
         const userCredential = await signInWithEmailAndPassword(
           auth,
           email,
           password
         );
+        console.log("[AuthForm] Usuario autenticado:", userCredential.user.uid);
 
         const idToken = await userCredential.user.getIdToken();
+        console.log("[AuthForm] idToken obtenido:", idToken ? "YES" : "NO");
+        
         if (!idToken) {
           toast.error("Sign in Failed. Please try again.");
           return;
         }
 
-        await signIn({
-          email,
-          idToken,
+        // Llama al endpoint para setear la cookie de sesión
+        console.log("[AuthForm] Llamando a /api/auth/session...");
+        const res = await fetch("/api/auth/session", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ idToken }),
+          credentials: "same-origin",
         });
+        console.log("[AuthForm] Respuesta recibida:", res.status);
+        
+        const dataRes = await res.json();
+        console.log("[AuthForm] Datos de respuesta:", dataRes);
+        
+        if (!dataRes.success) {
+          toast.error("No se pudo crear la sesión. Intenta de nuevo.");
+          return;
+        }
 
         toast.success("Signed in successfully.");
-        router.push("/");
+        console.log("[AuthForm] Redirigiendo a /...");
+        
+        // Forzar recarga completa para que Next.js reconozca la nueva cookie
+        window.location.href = "/";
       }
     } catch (error) {
       console.log(error);
@@ -112,11 +132,11 @@ const AuthForm = ({ type }: { type: FormType }) => {
         </h3>
 
         <Form {...form}>
-              <form
-                onSubmit={form.handleSubmit(onSubmit)}
-                className="w-full space-y-6 mt-4 form"
-                autoComplete="off"
-              >
+          <form
+            onSubmit={form.handleSubmit(onSubmit)}
+            className="w-full space-y-6 mt-4 form"
+            autoComplete="off"
+          >
             {!isSignIn && (
               <FormField
                 control={form.control}
@@ -127,21 +147,21 @@ const AuthForm = ({ type }: { type: FormType }) => {
               />
             )}
 
-                    <FormField
-                      control={form.control}
-                      name="email"
-                      label="Email"
-                      placeholder="Your email address"
-                      type="email"
-                    />
+            <FormField
+              control={form.control}
+              name="email"
+              label="Email"
+              placeholder="Your email address"
+              type="email"
+            />
 
-                    <FormField
-                      control={form.control}
-                      name="password"
-                      label="Password"
-                      placeholder="Enter your password"
-                      type="password"
-                    />
+            <FormField
+              control={form.control}
+              name="password"
+              label="Password"
+              placeholder="Enter your password"
+              type="password"
+            />
 
             <Button className="btn" type="submit">
               {isSignIn ? "Iniciar sesión" : "Crear cuenta"}

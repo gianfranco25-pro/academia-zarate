@@ -7,6 +7,11 @@ import { isAuthenticated, signOut } from "@/lib/actions/auth.action";
 
 const Layout = async ({ children }: { children: ReactNode }) => {
   const isUserAuthenticated = await isAuthenticated();
+  
+  // Si no está autenticado, redirigir a sign-in
+  if (!isUserAuthenticated) {
+    redirect('/sign-in');
+  }
 
   return (
     <div className="root-layout">
@@ -15,17 +20,15 @@ const Layout = async ({ children }: { children: ReactNode }) => {
           <Image src="/logo.svg" alt="Academia Zarate Consultas Logo" width={38} height={32} />
           <h2 className="text-primary-100">Academia Zarate Consultas</h2>
         </Link>
-        {isUserAuthenticated && (
-          <form action={async () => {
-            'use server';
-            await signOut();
-            redirect('/sign-in');
-          }}>
-            <button type="submit" className="px-4 py-2 bg-primary-100 text-white rounded">
-              Cerrar sesión
-            </button>
-          </form>
-        )}
+        <form action={async () => {
+          'use server';
+          await signOut();
+          redirect('/sign-in');
+        }}>
+          <button type="submit" className="px-4 py-2 bg-primary-100 text-white rounded">
+            Cerrar sesión
+          </button>
+        </form>
       </nav>
 
       {children}
