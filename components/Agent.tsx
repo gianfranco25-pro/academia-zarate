@@ -35,6 +35,7 @@ const Agent = ({
   const [messages, setMessages] = useState<SavedMessage[]>([]);
   const [isSpeaking, setIsSpeaking] = useState(false);
   const [lastMessage, setLastMessage] = useState<string>("");
+  const [partialTranscript, setPartialTranscript] = useState<string>("");
 
   useEffect(() => {
     const onCallStart = () => {
@@ -46,9 +47,16 @@ const Agent = ({
     };
 
     const onMessage = (message: Message) => {
-      if (message.type === "transcript" && message.transcriptType === "final") {
-        const newMessage = { role: message.role, content: message.transcript };
-        setMessages((prev) => [...prev, newMessage]);
+      if (message.type === "transcript") {
+        if (message.transcriptType === "final") {
+          // Transcripción final - agregar al historial
+          const newMessage = { role: message.role, content: message.transcript };
+          setMessages((prev) => [...prev, newMessage]);
+          setPartialTranscript(""); // Limpiar la transcripción parcial
+        } else if (message.transcriptType === "partial") {
+          // Transcripción parcial - mostrar en tiempo real
+          setPartialTranscript(message.transcript);
+        }
       }
     };
 
@@ -150,24 +158,37 @@ const Agent = ({
     <div className="flex flex-row w-full gap-8">
       {/* Historial de mensajes (transcripción) a la izquierda */}
       <div className="w-1/3 min-h-[400px] max-h-[600px] overflow-y-auto bg-dark-300 rounded-lg p-4 shadow-lg">
-        <h4 className="text-lg font-semibold mb-4 text-primary-100">Historial</h4>
-        {messages.length === 0 ? (
-          <p className="text-gray-400">Aún no hay mensajes.</p>
+        <h4 className="text-lg font-semibold mb-4 text-primary-100">Historial de Conversación</h4>
+        {messages.length === 0 && !partialTranscript ? (
+          <p className="text-gray-400 text-sm">Aún no hay mensajes. Presiona "Llamar" para iniciar.</p>
         ) : (
-          <ul className="space-y-2">
+          <ul className="space-y-3">
             {messages.map((msg, idx) => (
-              <li key={idx} className={cn(
-                "rounded px-3 py-2",
-                msg.role === "user" ? "bg-primary-100 text-white self-end ml-auto w-fit" :
-                msg.role === "assistant" ? "bg-light-400 text-dark-100 self-start mr-auto w-fit" :
-                "bg-gray-700 text-white"
-              )}>
-                <span className="block text-xs opacity-70 mb-1">
-                  {msg.role === "user" ? "Tú" : msg.role === "assistant" ? "IA" : "Sistema"}
+              <li 
+                key={idx} 
+                className={cn(
+                  "rounded-lg px-4 py-3 break-words",
+                  msg.role === "user" 
+                    ? "bg-primary-100 text-white ml-auto max-w-[85%]" 
+                    : msg.role === "assistant" 
+                    ? "bg-light-400 text-dark-100 mr-auto max-w-[85%]" 
+                    : "bg-gray-700 text-white mx-auto max-w-[90%]"
+                )}
+              >
+                <span className="block text-xs font-semibold opacity-80 mb-1">
+                  {msg.role === "user" ? "Tú" : msg.role === "assistant" ? "IA Asistente" : "Sistema"}
                 </span>
-                <span>{msg.content}</span>
+                <span className="text-sm leading-relaxed whitespace-pre-wrap">{msg.content}</span>
               </li>
             ))}
+            
+            {/* Mostrar transcripción parcial en tiempo real */}
+            {partialTranscript && (
+              <li className="rounded-lg px-4 py-3 bg-gray-600 text-white opacity-60 ml-auto max-w-[85%] italic">
+                <span className="block text-xs font-semibold opacity-80 mb-1">Tú (escribiendo...)</span>
+                <span className="text-sm leading-relaxed whitespace-pre-wrap">{partialTranscript}</span>
+              </li>
+            )}
           </ul>
         )}
       </div>
