@@ -208,7 +208,7 @@ const Agent = ({
               />
               {isSpeaking && <span className="animate-speak" />}
             </div>
-            <h3>AI Interviewer</h3>
+            <h3>Asistente IA</h3>
           </div>
 
           {/* User Profile Card */}
